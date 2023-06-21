@@ -2,7 +2,7 @@
 interface BlockState {
   x: number
   y: number
-  revealed?: boolean // 是否被揭示
+  revealed: boolean // 是否被揭示
   mine?: boolean // 是否是地雷
   flagged?: boolean // 是否被标记
   adjacentMines: number // 周围地雷的数量
@@ -17,15 +17,22 @@ const data = reactive(
         x,
         y,
         adjacentMines: 0,
+        revealed: false,
       }),
     ),
   ))
+
 // 生成地雷
-function generateMines() {
+function generateMines(initial: BlockState) {
   for (const row of data) {
-    for (const block of row)
+    for (const block of row) {
+      if (Math.abs(initial.x - block.x) < 1
+      && Math.abs(initial.y - block.y) < 1)
+        continue
       block.mine = Math.random() < 0.4
+    }
   }
+  updateNumbers()
 }
 
 const directions = [
@@ -57,28 +64,54 @@ function updateNumbers() {
     row.forEach((block, x) => {
       if (block.mine)
         return
-      directions.forEach(([dx, dy]) => {
-        const x2 = x + dx
-        const y2 = y + dy
-        if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
-          return
-        if (data[y2][x2].mine)
+      getSiblings(block).forEach((b) => {
+        if (b.mine)
           block.adjacentMines++
       })
     })
   })
 }
+
+function getSiblings(block: BlockState) {
+  return directions.map(([dx, dy]) => {
+    const x2 = block.x + dx
+    const y2 = block.y + dy
+    if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
+      return undefined
+    return data[y2][x2]
+  }).filter(Boolean) as BlockState[]
+}
+
 function getBlockClass(block: BlockState) {
+  if (!block.revealed)
+    return 'bg-gray-500/10'
   return block.mine
     ? 'bg-red-500/50'
     : numberColor[block.adjacentMines]
 }
 
-generateMines()
-updateNumbers()
+function expendZero(block: BlockState) {
+  if (block.adjacentMines === 0 || block.revealed)
+    return
+  getSiblings(block).forEach((s) => {
+    s.revealed = true
+    expendZero(s)
+  })
+}
 
-function onClick(x: number, y: number) {
-  // console.log(`Click at ${x},${y}`)
+let mineGenerated = false
+// 开发模式
+const dev = true
+// 点击事件
+function onClick(block: BlockState) {
+  if (!mineGenerated) {
+    generateMines(block)
+    mineGenerated = true
+  }
+  block.revealed = true
+  if (block.mine)
+    alert('BOOOM!!')
+  expendZero(block)
 }
 </script>
 
@@ -94,23 +127,25 @@ function onClick(x: number, y: number) {
     justify-center
   >
     <button
-      v-for="(item, x) in row"
+      v-for="(block, x) in row"
       :key="x"
-
       flex="~"
-
       border="1 gray-400/10"
-
-      m-0.5 h-10 w-10 items-center justify-center hover:bg-gray
-      :class="getBlockClass(item)"
-      @click="onClick(x, y)"
+      m-0.5
+      h-10
+      w-10
+      items-center
+      justify-center
+      hover="bg-gray/10"
+      :class="getBlockClass(block)"
+      @click="onClick(block)"
     >
-      <div v-if="item.mine" i-mdi:mine>
-        x
-      </div>
-      <div v-else>
-        {{ item.adjacentMines }}
-      </div>
+      <template v-if="block.revealed || dev">
+        <div v-if="block.mine" i-mdi-mine />
+        <div v-else>
+          {{ block.adjacentMines }}
+        </div>
+      </template>
     </button>
   </div>
 </template>
