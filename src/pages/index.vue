@@ -39,6 +39,18 @@ const directions = [
   [0, 1],
 ]
 
+const numberColor = [
+  'text-transparent',
+  'text-green-400',
+  'text-blue-400',
+  'text-yellow-400',
+  'text-orange-400',
+  'text-red-400',
+  'text-purple-400',
+  'text-pink-400',
+  'text-teal-400',
+]
+
 // 计算格子的数字
 function updateNumbers() {
   data.forEach((row, y) => {
@@ -57,7 +69,9 @@ function updateNumbers() {
   })
 }
 function getBlockClass(block: BlockState) {
-  return block.mine ? 'text-red' : 'text-gray'
+  return block.mine
+    ? 'bg-red-500/50'
+    : numberColor[block.adjacentMines]
 }
 
 generateMines()
@@ -69,22 +83,34 @@ function onClick(x: number, y: number) {
 </script>
 
 <template>
-  <div>Minesweeper</div>
+  <div mb-8>
+    Minesweeper
+  </div>
   <div
     v-for="(row, y) in data"
     :key="y"
+    flex="~"
+    items-center
+    justify-center
   >
     <button
       v-for="(item, x) in row"
       :key="x"
-      h-10
-      w-10
-      border
-      hover:bg-gray
+
+      flex="~"
+
+      border="1 gray-400/10"
+
+      m-0.5 h-10 w-10 items-center justify-center hover:bg-gray
       :class="getBlockClass(item)"
       @click="onClick(x, y)"
     >
-      {{ item.mine ? 'x' : item.adjacentMines }}
+      <div v-if="item.mine" i-mdi:mine>
+        x
+      </div>
+      <div v-else>
+        {{ item.adjacentMines }}
+      </div>
     </button>
   </div>
 </template>
