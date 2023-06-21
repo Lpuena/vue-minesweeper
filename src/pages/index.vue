@@ -2,10 +2,10 @@
 interface BlockState {
   x: number
   y: number
-  revealed?: boolean
-  mine?: boolean
-  flagged?: boolean
-  adjacentMines: number
+  revealed?: boolean // 是否被揭示
+  mine?: boolean // 是否是地雷
+  flagged?: boolean // 是否被标记
+  adjacentMines: number // 周围地雷的数量
 }
 
 const HEIGHT = 10
@@ -47,7 +47,7 @@ function updateNumbers() {
         return
       directions.forEach(([dx, dy]) => {
         const x2 = x + dx
-        const y2 = x + dy
+        const y2 = y + dy
         if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
           return
         if (data[y2][x2].mine)
