@@ -29,7 +29,7 @@ function generateMines(initial: BlockState) {
       if (Math.abs(initial.x - block.x) < 1
       && Math.abs(initial.y - block.y) < 1)
         continue
-      block.mine = Math.random() < 0.4
+      block.mine = Math.random() < 0.2
     }
   }
   updateNumbers()
@@ -72,6 +72,7 @@ function updateNumbers() {
   })
 }
 
+// 获得旁边九宫格内八个相邻的数组
 function getSiblings(block: BlockState) {
   return directions.map(([dx, dy]) => {
     const x2 = block.x + dx
@@ -90,12 +91,15 @@ function getBlockClass(block: BlockState) {
     : numberColor[block.adjacentMines]
 }
 
+// 展开周围的空白
 function expendZero(block: BlockState) {
-  if (block.adjacentMines === 0 || block.revealed)
+  if (block.adjacentMines)
     return
   getSiblings(block).forEach((s) => {
-    s.revealed = true
-    expendZero(s)
+    if (!s.revealed) {
+      s.revealed = true
+      expendZero(s)
+    }
   })
 }
 
@@ -103,7 +107,7 @@ let mineGenerated = false
 // 开发模式
 const dev = true
 // 点击事件
-function onClick(block: BlockState) {
+function onClick(e: MouseEvent, block: BlockState) {
   if (!mineGenerated) {
     generateMines(block)
     mineGenerated = true
@@ -138,7 +142,7 @@ function onClick(block: BlockState) {
       justify-center
       hover="bg-gray/10"
       :class="getBlockClass(block)"
-      @click="onClick(block)"
+      @click="onClick($event, block)"
     >
       <template v-if="block.revealed || dev">
         <div v-if="block.mine" i-mdi-mine />
