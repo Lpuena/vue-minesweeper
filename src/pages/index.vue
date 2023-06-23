@@ -8,8 +8,8 @@ interface BlockState {
   adjacentMines: number // 周围地雷的数量
 }
 
-const HEIGHT = 10
-const WIDTH = 10
+const HEIGHT = 5
+const WIDTH = 5
 const data = reactive(
   Array.from({ length: HEIGHT }, (_, y) =>
     Array.from({ length: WIDTH },
@@ -84,8 +84,10 @@ function getSiblings(block: BlockState) {
 }
 
 function getBlockClass(block: BlockState) {
-  if (!block.revealed)
+  if (block.flagged)
     return 'bg-gray-500/10'
+  if (!block.revealed)
+    return 'bg-gray-500/10 hover:bg-gray-500/20'
   return block.mine
     ? 'bg-red-500/50'
     : numberColor[block.adjacentMines]
@@ -93,7 +95,7 @@ function getBlockClass(block: BlockState) {
 
 // 展开周围的空白
 function expendZero(block: BlockState) {
-  if (block.adjacentMines)
+  if (block.adjacentMines || block.mine)
     return
   getSiblings(block).forEach((s) => {
     if (!s.revealed) {
@@ -116,6 +118,24 @@ function onClick(e: MouseEvent, block: BlockState) {
   if (block.mine)
     alert('BOOOM!!')
   expendZero(block)
+  // checkGameState()
+}
+function onRightClick(block: BlockState) {
+  if (block.revealed)
+    return
+  block.flagged = !block.flagged
+  // checkGameState()
+}
+// watch(checkGameState, () => {})
+watchEffect(() => checkGameState())
+function checkGameState() {
+  const blocks = data.flat()
+  if (blocks.every(block => block.revealed || block.flagged)) {
+    if (blocks.some(block => block.flagged && !block.mine))
+      alert('You cheat!')
+    else
+      alert('You win!')
+  }
 }
 </script>
 
@@ -140,11 +160,15 @@ function onClick(e: MouseEvent, block: BlockState) {
       w-10
       items-center
       justify-center
-      hover="bg-gray/10"
+
       :class="getBlockClass(block)"
       @click="onClick($event, block)"
+      @contextmenu.prevent="onRightClick(block)"
     >
-      <template v-if="block.revealed || dev">
+      <template v-if="block.flagged">
+        <div i-mdi-flag text-red />
+      </template>
+      <template v-else-if="block.revealed || dev">
         <div v-if="block.mine" i-mdi-mine />
         <div v-else>
           {{ block.adjacentMines }}
