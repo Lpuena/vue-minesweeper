@@ -8,8 +8,8 @@ interface BlockState {
   adjacentMines: number // 周围地雷的数量
 }
 
-const HEIGHT = 5
-const WIDTH = 5
+const HEIGHT = 10
+const WIDTH = 10
 const data = reactive(
   Array.from({ length: HEIGHT }, (_, y) =>
     Array.from({ length: WIDTH },
