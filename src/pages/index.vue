@@ -122,7 +122,7 @@ function onRightClick(block: BlockState) {
 // watch(checkGameState, () => {})
 watchEffect(() => checkGameState())
 function checkGameState() {
-  const blocks = data.flat()
+  const blocks = data.value.flat()
   if (blocks.every(block => block.revealed || block.flagged)) {
     if (blocks.some(block => block.flagged && !block.mine))
       alert('You cheat!')
