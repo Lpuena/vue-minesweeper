@@ -22,7 +22,7 @@ function generateMines(initial: BlockState) {
       if (Math.abs(initial.x - block.x) < 1
       && Math.abs(initial.y - block.y) < 1)
         continue
-      block.mine = Math.random() < 0.4
+      block.mine = Math.random() < 0.2
     }
   }
   updateNumbers()
@@ -65,6 +65,7 @@ function updateNumbers() {
   })
 }
 
+// 获得旁边九宫格内八个相邻的数组
 function getSiblings(block: BlockState) {
   return directions.map(([dx, dy]) => {
     const x2 = block.x + dx
@@ -76,19 +77,24 @@ function getSiblings(block: BlockState) {
 }
 
 function getBlockClass(block: BlockState) {
-  if (!block.revealed)
+  if (block.flagged)
     return 'bg-gray-500/10'
+  if (!block.revealed)
+    return 'bg-gray-500/10 hover:bg-gray-500/20'
   return block.mine
     ? 'bg-red-500/50'
     : numberColor[block.adjacentMines]
 }
 
+// 展开周围的空白
 function expendZero(block: BlockState) {
-  if (block.adjacentMines === 0 || block.revealed)
+  if (block.adjacentMines || block.mine)
     return
   getSiblings(block).forEach((s) => {
-    s.revealed = true
-    expendZero(s)
+    if (!s.revealed) {
+      s.revealed = true
+      expendZero(s)
+    }
   })
 }
 
@@ -96,7 +102,7 @@ let mineGenerated = false
 // 开发模式
 const dev = true
 // 点击事件
-function onClick(block: BlockState) {
+function onClick(e: MouseEvent, block: BlockState) {
   if (!mineGenerated) {
     generateMines(block)
     mineGenerated = true
@@ -105,6 +111,24 @@ function onClick(block: BlockState) {
   if (block.mine)
     alert('BOOOM!!')
   expendZero(block)
+  // checkGameState()
+}
+function onRightClick(block: BlockState) {
+  if (block.revealed)
+    return
+  block.flagged = !block.flagged
+  // checkGameState()
+}
+// watch(checkGameState, () => {})
+watchEffect(() => checkGameState())
+function checkGameState() {
+  const blocks = data.flat()
+  if (blocks.every(block => block.revealed || block.flagged)) {
+    if (blocks.some(block => block.flagged && !block.mine))
+      alert('You cheat!')
+    else
+      alert('You win!')
+  }
 }
 </script>
 
@@ -129,11 +153,15 @@ function onClick(block: BlockState) {
       w-10
       items-center
       justify-center
-      hover="bg-gray/10"
+
       :class="getBlockClass(block)"
-      @click="onClick(block)"
+      @click="onClick($event, block)"
+      @contextmenu.prevent="onRightClick(block)"
     >
-      <template v-if="block.revealed || dev">
+      <template v-if="block.flagged">
+        <div i-mdi-flag text-red />
+      </template>
+      <template v-else-if="block.revealed || dev">
         <div v-if="block.mine" i-mdi-mine />
         <div v-else>
           {{ block.adjacentMines }}
