@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { GamePlay } from '~/composables/logic'
 
+import { isDev, toggleDev } from '~/composables'
+
 const play = new GamePlay(5, 5)
-const data = play.data
+useStorage('vuesweapper-state', play.data)
+const data = computed(() => play.board)
 </script>
 
 <template>
