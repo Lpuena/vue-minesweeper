@@ -1,16 +1,9 @@
 <script setup lang="ts">
-interface BlockState {
-  x: number
-  y: number
-  revealed: boolean // 是否被揭示
-  mine?: boolean // 是否是地雷
-  flagged?: boolean // 是否被标记
-  adjacentMines: number // 周围地雷的数量
-}
+import type { BlockState } from '~/types'
 
 const HEIGHT = 10
 const WIDTH = 10
-const data = reactive(
+const data = ref(
   Array.from({ length: HEIGHT }, (_, y) =>
     Array.from({ length: WIDTH },
       (_, x): BlockState => ({
@@ -24,7 +17,7 @@ const data = reactive(
 
 // 生成地雷
 function generateMines(initial: BlockState) {
-  for (const row of data) {
+  for (const row of data.value) {
     for (const block of row) {
       if (Math.abs(initial.x - block.x) < 1
       && Math.abs(initial.y - block.y) < 1)
@@ -60,7 +53,7 @@ const numberColor = [
 
 // 计算格子的数字
 function updateNumbers() {
-  data.forEach((row, y) => {
+  data.value.forEach((row, y) => {
     row.forEach((block, x) => {
       if (block.mine)
         return
@@ -78,7 +71,7 @@ function getSiblings(block: BlockState) {
     const y2 = block.y + dy
     if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
       return undefined
-    return data[y2][x2]
+    return data.value[y2][x2]
   }).filter(Boolean) as BlockState[]
 }
 
