@@ -58,7 +58,7 @@ export class GamePlay {
           continue
         if (Math.abs(initial.y - block.y) < 1)
           continue
-        block.mine = Math.random() < 0.2
+        block.mine = Math.random() < 0.1
       }
     }
     this.updateNumbers()
@@ -138,8 +138,12 @@ export class GamePlay {
       if (blocks.some(block => block.flagged && !block.mine)) {
         this.data.value.gameState = 'lost'
         this.showAllMines()
+        alert('lost')
       }
-      else { this.data.value.gameState = 'won' }
+      else {
+        this.data.value.gameState = 'won'
+        alert('won')
+      }
     }
   }
 

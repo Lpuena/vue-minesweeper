@@ -6,10 +6,14 @@ import { isDev, toggleDev } from '~/composables'
 const play = new GamePlay(5, 5)
 useStorage('vuesweapper-state', play.data)
 const data = computed(() => play.board)
+
+watchEffect(() => {
+  play.checkGameState()
+})
 </script>
 
 <template>
-  <div mb-8>
+  <div mb-8 font-bold text-purple>
     Minesweeper
   </div>
   <div
