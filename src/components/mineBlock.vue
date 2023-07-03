@@ -30,10 +30,10 @@ function getBlockClass(block: BlockState) {
 <template>
   <button
     flex="~"
-    border="1 gray-400/10"
-    m-0.5
-    min-h-10
-    min-w-10
+    border="0.5 gray-400/10"
+    m-0.2
+    min-h-8
+    min-w-8
     items-center
     justify-center
     :class="getBlockClass(block)"
