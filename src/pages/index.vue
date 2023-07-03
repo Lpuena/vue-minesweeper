@@ -3,9 +3,13 @@ import { GamePlay } from '~/composables/logic'
 
 import { isDev, toggleDev } from '~/composables'
 
-const play = new GamePlay(5, 5)
+const play = new GamePlay(12, 12, 30)
 useStorage('vuesweapper-state', play.data)
 const data = computed(() => play.board)
+
+const mineCount = computed(() => {
+  return play.blocks.reduce((a, b) => a + (b.mine ? 1 : 0), 0)
+})
 
 watchEffect(() => {
   play.checkGameState()
@@ -31,6 +35,8 @@ watchEffect(() => {
       @contextmenu.prevent="play.onRightClick(block)"
     />
   </div>
+  <div>count{{ mineCount }}</div>
+
   <div flex="~ gap-1" mt-5 justify-center>
     <button btn @click="toggleDev()">
       {{ isDev ? 'DEV' : 'NORMAL' }}
