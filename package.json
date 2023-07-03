@@ -12,7 +12,9 @@
     "postinstall": "npx simple-git-hooks"
   },
   "dependencies": {
+    "@types/canvas-confetti": "^1.6.0",
     "@vueuse/core": "^10.1.2",
+    "canvas-confetti": "^1.6.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.2"
   },

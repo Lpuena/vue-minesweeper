@@ -3,7 +3,7 @@ import { GamePlay } from '~/composables/logic'
 
 import { isDev, toggleDev } from '~/composables'
 
-const play = new GamePlay(12, 12, 30)
+const play = new GamePlay(5, 5, 5)
 useStorage('vuesweapper-state', play.data)
 const data = computed(() => play.board)
 
@@ -45,6 +45,8 @@ watchEffect(() => {
     <button btn @click="play.reset()">
       RESET
     </button>
+
+    <Confetti :passed="play.data.value.gameState === 'won'" />
   </div>
 </template>
 
