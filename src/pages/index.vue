@@ -20,22 +20,23 @@ watchEffect(() => {
   <div mb-8 font-bold text-purple>
     Minesweeper
   </div>
-  <div
-    v-for="(row, y) in data"
-    :key="y"
-    flex="~"
-    items-center
-    justify-center
-  >
-    <mine-block
-      v-for="(block, x) in row"
-      :key="x"
-      :block="block"
-      @click="play.onClick(block)"
-      @contextmenu.prevent="play.onRightClick(block)"
-    />
+  <div w-full overflow-auto p5>
+    <div
+      v-for="(row, y) in data"
+      :key="y"
+      flex="~"
+      ma w-max items-center justify-center
+    >
+      <mine-block
+        v-for="(block, x) in row"
+        :key="x"
+        :block="block"
+        @click="play.onClick(block)"
+        @contextmenu.prevent="play.onRightClick(block)"
+      />
+    </div>
   </div>
-  <div>count{{ mineCount }}</div>
+  <div>count {{ mineCount }}</div>
 
   <div flex="~ gap-1" mt-5 justify-center>
     <button btn @click="toggleDev()">
