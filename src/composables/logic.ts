@@ -11,11 +11,13 @@ const directions = [
   [0, 1],
 ]
 
+type GameStatus = 'play' | 'won' | 'lost'
 interface GameState {
   board: BlockState[][]
   mineGenerated: boolean
-  gameState: 'play' | 'won' | 'lost'
+  status: GameStatus
   startTime: number
+  endMs?: number
 }
 
 export class GamePlay {
@@ -52,7 +54,7 @@ export class GamePlay {
     this.data.value = {
       startTime: +new Date(),
       mineGenerated: false,
-      gameState: 'play',
+      status: 'play',
       board: Array.from({ length: this.height }, (_, y) =>
         Array.from({ length: this.width },
           (_, x): BlockState => ({
@@ -135,7 +137,7 @@ export class GamePlay {
 
   // 点击事件
   onClick(block: BlockState) {
-    if (this.data.value.gameState !== 'play')
+    if (this.data.value.status !== 'play')
       return
     if (!this.data.value.mineGenerated) {
       this.generateMines(this.board, block)
@@ -143,8 +145,7 @@ export class GamePlay {
     }
     block.revealed = true
     if (block.mine) {
-      this.data.value.gameState = 'lost'
-      this.showAllMines()
+      this.onGameOver('lost')
       return
     }
     this.expendZero(block)
@@ -153,7 +154,7 @@ export class GamePlay {
 
   // 右键点击事件
   onRightClick(block: BlockState) {
-    if (this.data.value.gameState !== 'play')
+    if (this.data.value.status !== 'play')
       return
     if (block.revealed)
       return
@@ -167,13 +168,10 @@ export class GamePlay {
       return
     const blocks = this.board.flat()
     if (blocks.every(block => block.revealed || block.flagged || block.mine)) {
-      if (blocks.some(block => block.flagged && !block.mine)) {
-        this.data.value.gameState = 'lost'
-        this.showAllMines()
-      }
-      else {
-        this.data.value.gameState = 'won'
-      }
+      if (blocks.some(block => block.flagged && !block.mine))
+        this.onGameOver('lost')
+      else
+        this.onGameOver('won')
     }
   }
 
@@ -183,5 +181,39 @@ export class GamePlay {
       if (item.mine)
         item.revealed = true
     })
+  }
+
+  // 双击展开功能
+  autoExpand(block: BlockState) {
+    const siblings = this.getSiblings(block)
+    const flags = siblings.reduce((a, b) => {
+      return a + (b.flagged ? 1 : 0)
+    }, 0)
+    const notRevealed = siblings.reduce((a, b) => {
+      return a + (!b.revealed && !b.flagged ? 1 : 0)
+    }, 0)
+
+    if (flags === block.adjacentMines) {
+      siblings.forEach((i) => {
+        i.revealed = true
+        if (i.mine)
+          this.onGameOver('lost')
+      })
+    }
+
+    const missingFlags = block.adjacentMines - flags
+    if (notRevealed === missingFlags) {
+      siblings.forEach((i) => {
+        if (!i.revealed && !i.flagged)
+          i.flagged = true
+      })
+    }
+  }
+
+  onGameOver(status: GameStatus) {
+    this.data.value.status = status
+    this.data.value.endMs = +Date.now()
+    if (status === 'lost')
+      this.showAllMines()
   }
 }

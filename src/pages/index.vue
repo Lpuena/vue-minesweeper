@@ -32,7 +32,7 @@ function newGame(difficulty: 'easy' | 'medium' | 'hard') {
 }
 
 const now = useNow()
-const countDown = computed(() => Math.round((+now.value - play.data.value.startTime) / 1000))
+const countDown = computed(() => Math.round(((play.data.value.endMs || +now.value) - play.data.value.startTime) / 1000))
 </script>
 
 <template>
@@ -73,6 +73,7 @@ const countDown = computed(() => Math.round((+now.value - play.data.value.startT
         :key="x"
         :block="block"
         @click="play.onClick(block)"
+        @dblclick="play.autoExpand(block)"
         @contextmenu.prevent="play.onRightClick(block)"
       />
     </div>
@@ -83,7 +84,7 @@ const countDown = computed(() => Math.round((+now.value - play.data.value.startT
       {{ isDev ? 'DEV' : 'NORMAL' }}
     </button>
 
-    <Confetti :passed="play.data.value.gameState === 'won'" />
+    <Confetti :passed="play.data.value.status === 'won'" />
   </div>
 </template>
 
