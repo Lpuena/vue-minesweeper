@@ -185,6 +185,9 @@ export class GamePlay {
 
   // 双击展开功能
   autoExpand(block: BlockState) {
+    if (this.data.value.status !== 'play' || block.flagged)
+      return
+
     const siblings = this.getSiblings(block)
     const flags = siblings.reduce((a, b) => {
       return a + (b.flagged ? 1 : 0)
@@ -195,6 +198,8 @@ export class GamePlay {
 
     if (flags === block.adjacentMines) {
       siblings.forEach((i) => {
+        if (i.revealed || i.flagged)
+          return
         i.revealed = true
         if (i.mine)
           this.onGameOver('lost')
