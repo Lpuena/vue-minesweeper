@@ -215,5 +215,8 @@ export class GamePlay {
     this.data.value.endMs = +Date.now()
     if (status === 'lost')
       this.showAllMines()
+    setTimeout(() => {
+      alert('Game Over')
+    }, 10)
   }
 }
